@@ -1,0 +1,132 @@
+[
+  {
+    "role": "system",
+    "content": "You are a helpful AI agent with memory. You can use tools to get the current time, calculate numbers, save notes, and read previous notes. Always use tools when needed. Be concise."
+  },
+  {
+    "role": "user",
+    "content": "What is the current date and time?"
+  },
+  {
+    "role": "assistant",
+    "reasoning": "Need to call function get_current_datetime.",
+    "tool_calls": [
+      {
+        "id": "fc_60eb959e-82ea-484f-9a87-5a3572406cbf",
+        "type": "function",
+        "function": {
+          "name": "get_current_datetime",
+          "arguments": "{}"
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "tool_call_id": "fc_60eb959e-82ea-484f-9a87-5a3572406cbf",
+    "content": "Saturday, 26 September 2026 at 6:28:28 pm GMT+5"
+  },
+  {
+    "role": "assistant",
+    "content": "The current date and time is **Saturday, 26 September 2026 at 6:28:28 pm GMT+5**."
+  },
+  {
+    "role": "user",
+    "content": "Calculate 55 * 12 - 30"
+  },
+  {
+    "role": "assistant",
+    "reasoning": "Call calculator.",
+    "tool_calls": [
+      {
+        "id": "fc_0127ca9f-5d9d-4fac-ad3f-78341d91db05",
+        "type": "function",
+        "function": {
+          "name": "calculator",
+          "arguments": "{\"expression\":\"55 * 12 - 30\"}"
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "tool_call_id": "fc_0127ca9f-5d9d-4fac-ad3f-78341d91db05",
+    "content": "Result: 630"
+  },
+  {
+    "role": "assistant",
+    "content": "\\(55 \\times 12 - 30 = 630\\)."
+  },
+  {
+    "role": "user",
+    "content": "Save a note with title \"My Goal\" and content \"I am building AI Agents step by step\""
+  },
+  {
+    "role": "assistant",
+    "reasoning": "Call save_note.",
+    "tool_calls": [
+      {
+        "id": "fc_3491d3eb-5761-486a-b266-2c545f6cbc5b",
+        "type": "function",
+        "function": {
+          "name": "save_note",
+          "arguments": "{\"content\":\"I am building AI Agents step by step\",\"title\":\"My Goal\"}"
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "tool_call_id": "fc_3491d3eb-5761-486a-b266-2c545f6cbc5b",
+    "content": "Note saved successfully: \"My Goal\""
+  },
+  {
+    "role": "assistant",
+    "content": "Your note has been saved under the title **“My Goal.”**"
+  },
+  {
+    "role": "user",
+    "content": "Read my notes"
+  },
+  {
+    "role": "assistant",
+    "reasoning": "Call read_notes.",
+    "tool_calls": [
+      {
+        "id": "fc_9a7cc5f1-0c51-462e-961f-ab94ad44cded",
+        "type": "function",
+        "function": {
+          "name": "read_notes",
+          "arguments": "{}"
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "tool_call_id": "fc_9a7cc5f1-0c51-462e-961f-ab94ad44cded",
+    "content": "1. My Goal\n   I am building AI Agents step by step\n   (Saved: 2026-09-26T13:29:41.194Z)"
+  },
+  {
+    "role": "assistant",
+    "content": "Here are your saved notes:\n\n1. **My Goal**  \n   *I am building AI Agents step by step*  \n\nFeel free to let me know if you’d like to add or update anything!"
+  },
+  {
+    "role": "user",
+    "content": "i..am..arooj hamayun it grduate"
+  },
+  {
+    "role": "assistant",
+    "content": "Got it! It sounds like you’re introducing yourself as **Arooj Hamayun, an IT graduate**. How can I assist you today?",
+    "reasoning": "User says \"i..am..arooj hamayun it grduate\". Probably they are saying \"I am Arooj Hamayun, it graduate\". Maybe they want to create a note? Or maybe they want something? The prompt: \"i..am..arooj hamayun it grduate\". It's unclear. They might be telling us about themselves. We might respond acknowledging. Provide a polite response."
+  },
+  {
+    "role": "user",
+    "content": "who am i"
+  },
+  {
+    "role": "assistant",
+    "content": "You’re **Arooj Hamayun**, an IT graduate. Let me know if you’d like me to add or edit any details about you in a note!",
+    "reasoning": "User: \"who am i\". They might want to retrieve information. They told us earlier \"i..am..arooj hamayun it grduate\". So answer: Arooj Hamayun, IT graduate. Should confirm."
+  }
+]

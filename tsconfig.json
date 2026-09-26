@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "commonjs",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "types": ["node"]
+  },
+  "include": [
+    "phase-1/**/*.ts",
+    "phase-2/**/*.ts",
+    "phase-3/**/*.ts",
+    "phase-4/**/*.ts"
+  ]
+}
