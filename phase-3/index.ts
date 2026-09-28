@@ -1,8 +1,9 @@
 import Groq from "groq-sdk";
 import dotenv from "dotenv";
+import * as path from "path";
 import * as readline from "readline";
 
-dotenv.config();
+dotenv.config({ path: path.join(__dirname, "..", ".env") });
 
 const client = new Groq({
   apiKey: process.env.GROQ_API_KEY,

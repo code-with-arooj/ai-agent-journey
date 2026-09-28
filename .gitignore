@@ -1,2 +1,25 @@
+# Environment & secrets
 .env
-node_modules
+.env.local
+.env.*.local
+
+# Dependencies
+node_modules/
+
+# Runtime data
+memory.json
+notes.json
+knowledge.txt
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Build / cache
+dist/
+build/
+.cache/

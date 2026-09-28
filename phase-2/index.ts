@@ -1,6 +1,9 @@
 import Groq from "groq-sdk";
-import "dotenv/config";
+import dotenv from "dotenv";
+import * as path from "path";
 import * as readline from "readline";
+
+dotenv.config({ path: path.join(__dirname, "..", ".env") });
 
 const groq = new Groq({
   apiKey: process.env.GROQ_API_KEY,
@@ -11,7 +14,7 @@ const rl = readline.createInterface({
   output: process.stdout,
 });
 
-// Yeh array saari baatein yaad rakhega
+
 const messages: { role: "system" | "user" | "assistant"; content: string }[] = [
   {
     role: "system",
@@ -27,7 +30,6 @@ async function chat() {
       return;
     }
 
-    // User ka message add karo
     messages.push({ role: "user", content: userInput });
 
     const response = await groq.chat.completions.create({
@@ -41,7 +43,6 @@ async function chat() {
     // AI ka jawab bhi yaad rakho
     messages.push({ role: "assistant", content: reply });
 
-    // Phir se sawal poocho
     chat();
   });
 }

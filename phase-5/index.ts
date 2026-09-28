@@ -4,7 +4,7 @@ import * as readline from "readline";
 import * as fs from "fs";
 import * as path from "path";
 
-dotenv.config({ path: path.join(__dirname, "..", ".env") });
+dotenv.config({ path: path.join(__dirname, "..", ".env") }); // root se .env read karega
 
 const client = new Groq({
   apiKey: process.env.GROQ_API_KEY,
@@ -20,8 +20,8 @@ function loadJSON(filePath: string, defaultValue: any) {
     if (fs.existsSync(filePath)) {
       return JSON.parse(fs.readFileSync(filePath, "utf-8"));
     }
-  } catch (err) {
-    console.log("Could not load file:", filePath);
+  } catch {
+    console.log("Could not load:", filePath);
   }
   return defaultValue;
 }
@@ -30,32 +30,25 @@ function saveJSON(filePath: string, data: any) {
   fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf-8");
 }
 
-// ====================== TOOLS DEFINITION ======================
+// ====================== TOOLS ======================
 const tools = [
   {
     type: "function" as const,
     function: {
       name: "get_current_datetime",
-      description: "Get the current date and time in Pakistan timezone",
-      parameters: {
-        type: "object",
-        properties: {},
-        required: [],
-      },
+      description: "Get current date and time in Pakistan",
+      parameters: { type: "object", properties: {}, required: [] },
     },
   },
   {
     type: "function" as const,
     function: {
       name: "calculator",
-      description: "Evaluate a math expression. Example: 25 * 4 + 10",
+      description: "Evaluate math expression. Example: 45 * 12 + 8",
       parameters: {
         type: "object",
         properties: {
-          expression: {
-            type: "string",
-            description: "The math expression to evaluate",
-          },
+          expression: { type: "string", description: "Math expression" },
         },
         required: ["expression"],
       },
@@ -65,18 +58,12 @@ const tools = [
     type: "function" as const,
     function: {
       name: "save_note",
-      description: "Save an important note or information for later use",
+      description: "Save important information as a note",
       parameters: {
         type: "object",
         properties: {
-          title: {
-            type: "string",
-            description: "Short title of the note",
-          },
-          content: {
-            type: "string",
-            description: "The actual content to save",
-          },
+          title: { type: "string", description: "Note title" },
+          content: { type: "string", description: "Note content" },
         },
         required: ["title", "content"],
       },
@@ -86,17 +73,13 @@ const tools = [
     type: "function" as const,
     function: {
       name: "read_notes",
-      description: "Read all previously saved notes",
-      parameters: {
-        type: "object",
-        properties: {},
-        required: [],
-      },
+      description: "Read all saved notes",
+      parameters: { type: "object", properties: {}, required: [] },
     },
   },
 ];
 
-// ====================== TOOL IMPLEMENTATIONS ======================
+// ====================== TOOL FUNCTIONS ======================
 function getCurrentDatetime(): string {
   return new Date().toLocaleString("en-PK", {
     timeZone: "Asia/Karachi",
@@ -111,36 +94,29 @@ function calculator(expression: string): string {
     const result = Function(`"use strict"; return (${cleaned})`)();
     return `Result: ${result}`;
   } catch {
-    return `Error: Could not calculate "${expression}"`;
+    return `Error calculating: ${expression}`;
   }
 }
 
 function saveNote(title: string, content: string): string {
   const notes = loadJSON(NOTES_FILE, []);
-  notes.push({
-    title,
-    content,
-    savedAt: new Date().toISOString(),
-  });
+  notes.push({ title, content, savedAt: new Date().toISOString() });
   saveJSON(NOTES_FILE, notes);
-  return `Note saved successfully: "${title}"`;
+  return `Note saved: "${title}"`;
 }
 
 function readNotes(): string {
   const notes = loadJSON(NOTES_FILE, []);
-  if (notes.length === 0) {
-    return "No notes found.";
-  }
+  if (notes.length === 0) return "No notes found.";
   return notes
-    .map(
-      (n: any, i: number) =>
-        `${i + 1}. ${n.title}\n   ${n.content}\n   (Saved: ${n.savedAt})`
-    )
-    .join("\n\n");
+    .map((n: any, i: number) => `${i + 1}. ${n.title}: ${n.content}`)
+    .join("\n");
 }
 
 // ====================== AGENT LOOP ======================
 async function runAgent(messages: any[]) {
+  let step = 1;
+
   while (true) {
     const response = await client.chat.completions.create({
       model: "openai/gpt-oss-20b",
@@ -157,29 +133,20 @@ async function runAgent(messages: any[]) {
       return message.content;
     }
 
-    // Execute tools
+    // Tool execution
     for (const toolCall of message.tool_calls) {
-      const functionName = toolCall.function.name;
+      const name = toolCall.function.name;
       const args = JSON.parse(toolCall.function.arguments || "{}");
 
-      console.log(`\n🔧 Tool called: ${functionName}`);
-      if (Object.keys(args).length > 0) {
-        console.log(`   Arguments:`, args);
-      }
+      console.log(`\n🔧 Step ${step} → Tool: ${name}`);
+      if (Object.keys(args).length) console.log("   Args:", args);
 
       let result = "";
-
-      if (functionName === "get_current_datetime") {
-        result = getCurrentDatetime();
-      } else if (functionName === "calculator") {
-        result = calculator(args.expression);
-      } else if (functionName === "save_note") {
-        result = saveNote(args.title, args.content);
-      } else if (functionName === "read_notes") {
-        result = readNotes();
-      } else {
-        result = `Unknown tool: ${functionName}`;
-      }
+      if (name === "get_current_datetime") result = getCurrentDatetime();
+      else if (name === "calculator") result = calculator(args.expression);
+      else if (name === "save_note") result = saveNote(args.title, args.content);
+      else if (name === "read_notes") result = readNotes();
+      else result = `Unknown tool: ${name}`;
 
       console.log(`   Result: ${result}`);
 
@@ -188,36 +155,38 @@ async function runAgent(messages: any[]) {
         tool_call_id: toolCall.id,
         content: result,
       });
+
+      step++;
     }
   }
 }
 
 // ====================== MAIN ======================
 async function main() {
-  console.log("🤖 Phase-4 Agent started!");
-  console.log("Features: Tools + Persistent Memory + Notes");
-  console.log("Type 'exit' to quit.\n");
+  console.log("🤖 Phase-5 Agent Started!");
+  console.log("Features: Multi-step Reasoning + Tools + Persistent Memory");
+  console.log("Type 'exit' to quit\n");
 
   const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
   });
 
-  // Load previous conversation memory
   let messages: any[] = loadJSON(MEMORY_FILE, [
     {
       role: "system",
-      content:
-        "You are a helpful AI agent with memory. You can use tools to get the current time, calculate numbers, save notes, and read previous notes. Always use tools when needed. Be concise.",
+      content: `You are a smart AI agent. 
+When a task needs multiple steps, think step-by-step.
+Use tools when needed. 
+Be clear and helpful.`,
     },
   ]);
 
   const ask = () => {
     rl.question("You: ", async (input) => {
       if (input.toLowerCase() === "exit") {
-        // Save memory before exit
         saveJSON(MEMORY_FILE, messages);
-        console.log("\nMemory saved. Goodbye!");
+        console.log("\nMemory saved. Bye!");
         rl.close();
         return;
       }
@@ -227,8 +196,6 @@ async function main() {
       try {
         const answer = await runAgent(messages);
         console.log(`\nAgent: ${answer}\n`);
-
-        // Save memory after every reply
         saveJSON(MEMORY_FILE, messages);
       } catch (err: any) {
         console.error("Error:", err.message);
